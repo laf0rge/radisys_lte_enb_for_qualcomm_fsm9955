@@ -1,0 +1,5 @@
+/* Source and licensing information for the line(s) below can be found at https://www.radisys.com/sites/all/themes/radisys/js/GA-iframe-parent-code.js. */
+;jQuery(document).ready(function(e){parent_domain='http://www.radisys.com';child_domain='http://go.radisys.com';var n=window.addEventListener?'addEventListener':'attachEvent',o=window[n],t=n=='attachEvent'?'onmessage':'message';o(t,function(n){var o=event.origin||event.originalEvent.origin;if(o!=child_domain){return}
+else{if(n.data.indexOf('iframe present')>-1){console.log('2 parent received iframe declaration from origin: '+o);var t=(self===top)?!0:!1,i=(self!==top)?!0:!1;if(t&&!i){ga('send','pageview')};console.log('3 parent flags itself to not fire pageview');console.log('4 parent sending msg to child');e('iframe')[0].contentWindow.postMessage('a msg from parent:\nreff:'+document.referrer+'\nchannel:'+document.location.search.substring(1)+'\nhref:'+document.location.href,child_domain)}}},!1)});;
+/* Source and licensing information for the above line(s) can be found at https://www.radisys.com/sites/all/themes/radisys/js/GA-iframe-parent-code.js. */
+;/*})'"*/

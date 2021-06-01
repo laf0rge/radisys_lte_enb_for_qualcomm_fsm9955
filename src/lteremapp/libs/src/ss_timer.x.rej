@@ -1,0 +1,108 @@
+***************
+*** 81,87 ****
+   
+       File:     ss_timer.x
+   
+!      Sid:      ss_timer.x@@/main/2 - Mon Apr  5 18:01:21 2010
+   
+       Prg:      kp
+   
+--- 81,87 ----
+   
+       File:     ss_timer.x
+   
+!      Sid:      ss_timer.x@@/main/3 - Mon Nov 17 15:54:25 2008
+   
+       Prg:      kp
+   
+***************
+*** 99,121 ****
+  
+  /* timer ID and type */
+  typedef SsIdx           SsTmrId;
+- /* ss015.301 Enclosed all timer activation functions in a union. */
+- typedef union {
+- #ifdef SS_MULTIPLE_PROCS
+-     PAIFTMRS16        tmrActvFn;
+- #else
+-     PAIFTMRS16        tmrActvFnMt;
+-     PFS16             tmrActvFn;
+- #endif
+- }pTmrActvFn;
+- 
+- 
+- typedef struct ssTmrActvFn
+- {
+-     Bool                 mtFlag;                 /* TRUE if tmrActvFnMt to be used */
+-     pTmrActvFn           actvFnc;
+- }SsTmrActvFn;
+- 
+  
+  
+  /* individual entry in the timer table */
+--- 99,104 ----
+  
+  /* timer ID and type */
+  typedef SsIdx           SsTmrId;
+  
+  
+  /* individual entry in the timer table */
+***************
+*** 134,142 ****
+     Inst         ownerInst;              /* owner task instance ID */
+     /* ss028.103 - Modification for SRegCfgTmr support */
+     U32          interval;               /* timer interval */
+!    /* ss029.103: modification: timer function type modified */ 
+!    /* ss015.301 Enclosed all timer activation functions in a union. */
+!    SsTmrActvFn  ssTmrActvFn;
+  
+     Buffer       *mBuf;                  /* timer message buffer */
+  
+--- 117,133 ----
+     Inst         ownerInst;              /* owner task instance ID */
+     /* ss028.103 - Modification for SRegCfgTmr support */
+     U32          interval;               /* timer interval */
+! /* ss029.103: modification: timer function type modified */ 
+! #ifndef SS_MULTIPLE_PROCS
+!    /* ss030.103 */
+! #ifdef SS_MT_TMR
+!    Bool         mtFlag;                 /* TRUE if tmrActvFnMt to be used */
+!    PAIFTMRS16   tmrActvFnMt;            /* for MT support, takes ent and inst */
+! #endif
+!    PFS16        tmrActvFn;              /* timer activation function */
+! #else
+!    PAIFTMRS16      tmrActvFn;
+! #endif /* SS_MULTIPLE_PROCS */
+  
+     Buffer       *mBuf;                  /* timer message buffer */
+  
+***************
+*** 157,163 ****
+    
+  /********************************************************************30**
+  
+!          End of file:     ss_timer.x@@/main/2 - Mon Apr  5 18:01:21 2010
+  
+  *********************************************************************31*/
+  
+--- 148,154 ----
+    
+  /********************************************************************30**
+  
+!          End of file:     ss_timer.x@@/main/3 - Mon Nov 17 15:54:25 2008
+  
+  *********************************************************************31*/
+  
+***************
+*** 192,197 ****
+                               multithreading support.
+  /main/3      ---      rp   1. SSI enhancements for Multi-core architecture
+                                support
+- /main/3    ss015.301  akapoor  1. Enclosed all timer activation functions in
+-                                   a union.
+  *********************************************************************91*/
+--- 183,186 ----
+                               multithreading support.
+  /main/3      ---      rp   1. SSI enhancements for Multi-core architecture
+                                support
+  *********************************************************************91*/

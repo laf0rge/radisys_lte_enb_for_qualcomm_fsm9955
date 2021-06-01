@@ -1,0 +1,432 @@
+#/********************************************************************16**
+#
+#            (c) Copyright 2012 by RadiSys Corporation. All rights reserved.
+#
+#     This software is confidential and proprietary to RadiSys Corporation.
+#     No part of this software may be reproduced, stored, transmitted, 
+#     disclosed or used in any form or by any means other than as expressly
+#     provided by the written Software License Agreement between Radisys 
+#     and its licensee.
+#
+#     Radisys warrants that for a period, as provided by the written
+#     Software License Agreement between Radisys and its licensee, this
+#     software will perform substantially to Radisys specifications as
+#     published at the time of shipment, exclusive of any updates or 
+#     upgrades, and the media used for delivery of this software will be 
+#     free from defects in materials and workmanship.  Radisys also warrants 
+#     that has the corporate authority to enter into and perform under the 
+#     Software License Agreement and it is the copyright owner of the software 
+#     as originally delivered to its licensee.
+#
+#     RADISYS MAKES NO OTHER WARRANTIES, EXPRESS OR IMPLIED, INCLUDING
+#     WITHOUT LIMITATION WARRANTIES OF MERCHANTABILITY OR FITNESS FOR
+#     A PARTICULAR PURPOSE WITH REGARD TO THIS SOFTWARE, SERVICE OR ANY RELATED
+#     MATERIALS.
+#
+#     IN NO EVENT SHALL RADISYS BE LIABLE FOR ANY INDIRECT, SPECIAL,
+#     CONSEQUENTIAL DAMAGES, OR PUNITIVE DAMAGES IN CONNECTION WITH OR ARISING
+#     OUT OF THE USE OF, OR INABILITY TO USE, THIS SOFTWARE, WHETHER BASED
+#     ON BREACH OF CONTRACT, TORT (INCLUDING NEGLIGENCE), PRODUCT
+#     LIABILITY, OR OTHERWISE, AND WHETHER OR NOT IT HAS BEEN ADVISED
+#     OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+#                       Restricted Rights Legend:
+#
+#     This software and all related materials licensed hereby are
+#     classified as "restricted computer software" as defined in clause
+#     52.227-19 of the Federal Acquisition Regulation ("FAR") and were
+#     developed entirely at private expense for nongovernmental purposes,
+#     are commercial in nature and have been regularly used for
+#     nongovernmental purposes, and, to the extent not published and
+#     copyrighted, are trade secrets and confidential and are provided
+#     with all rights reserved under the copyright laws of the United
+#     States.  The government's rights to the software and related
+#     materials are limited and restricted as provided in clause
+#     52.227-19 of the FAR.
+#
+#                    IMPORTANT LIMITATION(S) ON USE
+#
+#     The use of this software is limited to the use set
+#     forth in the written Software License Agreement between Radisys and
+#     its Licensee. Among other things, the use of this software
+#     may be limited to a particular type of Designated Equipment, as 
+#     defined in such Software License Agreement.
+#     Before any installation, use or transfer of this software, please
+#     consult the written Software License Agreement or contact Radisys at
+#     the location set forth below in order to confirm that you are
+#     engaging in a permissible use of the software.
+#
+#                    RadiSys Corporation
+#                    Tel: +1 (858) 882 8800
+#                    Fax: +1 (858) 777 3388
+#                    Email: support@trillium.com
+#                    Web: http://www.radisys.com 
+# 
+#*********************************************************************17*/
+###########################################################################################################
+# 
+#  Note:- This script should be run in enbapp/build folder
+#
+#  Usage:  ./TeNBCP_build mspd/linux 
+#  Example: ./TeNBCP_build mspd/linux
+#
+###########################################################################################################
+if [ $# -lt 1 ]; then
+echo "Usage is ./TeNBCP_build qcom "
+echo "           or                "
+echo "Usage is ./TeNBCP_build mspd "
+echo "           or                "
+echo "Usage is ./TeNBCP_build brcm "
+echo "           or                "
+echo "Usage is ./TeNBCP_build linux"
+exit
+elif [ $# -gt 1 ]; then
+echo "Usage is ./TeNBCP_build qcom "
+echo "           or                "
+echo "Usage is ./TeNBCP_build mspd "
+echo "           or                "
+echo "Usage is ./TeNBCP_build brcm "
+echo "           or                "
+echo "Usage is ./TeNBCP_build linux"
+exit
+
+###############################################################################
+
+elif [ $1 = 'qcom' ]; then
+
+echo "Please enter the path where the build is to be copied"
+read oampath
+mkdir -p $oampath
+chmod 777 $oampath
+
+mkdir $oampath/rsys
+mkdir $oampath/rsys/bin
+mkdir $oampath/rsys/scripts
+mkdir $oampath/rsys/lib
+mkdir $oampath/rsys/config
+
+#Setting the Environment arm path
+ARM_LIB=../../../../../LINUX/project/fsm9900_cdp-fapi/platform-fsm9900_cdp-fapi/root/lib/
+echo "ARM_LIB PATH= $ARM_LIB"
+echo "The build will be copied to $oampath"
+sleep 2
+
+# libraries
+cp -rf ../tenb_commonplatform/software/libs/common/mib-common/obj/hbs2-iu/hbs2-4/arm-v7a-linux-gnueabi/libRadisys-mib-common.so $oampath/rsys/lib
+cp -rf ../tenb_commonplatform/software/libs/common/mobnet/obj/hbs2-4/arm-v7a-linux-gnueabi/libthreeway-mobnet.so   $oampath/rsys/lib
+cp -rf ../tenb_commonplatform/software/libs/common/comms/obj/hbs2-4/arm-v7a-linux-gnueabi/libthreeway-comms.so  $oampath/rsys/lib
+cp -rf ../tenb_commonplatform/software/libs/common/system/obj/hbs2-4/arm-v7a-linux-gnueabi/libthreeway-system.so $oampath/rsys/lib
+cp -rf ../tenb_commonplatform/software/libs/messaging/obj/hbs2-iu/hbs2-4/arm-v7a-linux-gnueabi/libthreeway-messaging.so  $oampath/rsys/lib
+cp -rf ../tenb_commonplatform/software/libs/mib-core/obj/hbs2-iu/hbs2-4/arm-v7a-linux-gnueabi/libRadisys-mib-core.so $oampath/rsys/lib
+cp -rf ../tenb_commonplatform/software/thirdparty/md5/obj/hbs2-4/arm-v7a-linux-gnueabi/libmd5.so $oampath/rsys/lib
+cp -rf ../tenb_commonplatform/software/thirdparty/kb_getc/obj/hbs2-4/arm-v7a-linux-gnueabi/libkb_getc.so $oampath/rsys/lib
+cp -f ../tenb_commonplatform/software/thirdparty/openssl-0.9.8/openssl-0.9.8r/lib/libcrypto.so $oampath/rsys/lib
+cp -rf ../tenb_commonplatform/software/apps/fap/management/oam-sm/obj/hbs2-4/arm-v7a-linux-gnueabi/libsm.so $oampath/rsys/lib
+cp -L $ARM_LIB/libstdc++.so.6 $oampath/rsys/lib
+cp -L $ARM_DIR/arm-v7a-linux-gnueabi/libc/armv4t/lib/libc-2.15.so $oampath/rsys/lib
+
+chmod 777 $oampath/rsys/lib/*
+
+#Binaries
+cp -rf ../build/obj/enodeb $oampath/rsys/bin
+#cp -rf ../lteremapp/obj/hbs2-iu/hbs2-4/arm-v7a-linux-gnueabi/rem $oampath/rsys/bin
+cp -rf ../tenb_commonplatform/software/apps/fap/management/oam/obj/hbs2-iu/hbs2-4/arm-v7a-linux-gnueabi/oam $oampath/rsys/bin
+cp -rf ../tenb_commonplatform/software/apps/fap/management/tr069-v2/obj/hbs2-iu/hbs2-4/arm-v7a-linux-gnueabi/tr069-v2 $oampath/rsys/bin
+cp -rf ../tenb_commonplatform/software/apps/fap/post-office/obj/hbs2-iu/hbs2-4/arm-v7a-linux-gnueabi/post-office $oampath/rsys/bin
+cp -rf ../tenb_commonplatform/software/apps/utilities/cli/obj/hbs2-iu/hbs2-4/arm-v7a-linux-gnueabi/cli $oampath/rsys/bin
+cp -rf ../tenb_commonplatform/software/apps/fap/management/update/obj/hbs2-iu/hbs2-4/arm-v7a-linux-gnueabi/fileTransMgr $oampath/rsys/bin
+cp -rf ../tenb_commonplatform/software/apps/fap/tenpin/obj/hbs2-iu/hbs2-4/arm-v7a-linux-gnueabi/tenpin $oampath/rsys/bin/
+cp -rf ../tenb_commonplatform/software/apps/fap/ike-tunnel-ind/obj/hbs2-iu/hbs2-4/arm-v7a-linux-gnueabi/ike-tunnel-ind $oampath/rsys/bin
+cp -rf ../watchdog/obj/hbs2-iu/hbs2-4/arm-v7a-linux-gnueabi/watchdogd $oampath/rsys/bin/
+
+chmod 777 $oampath/rsys/bin/*
+
+# configuration files
+dos2unix -f  ../build/wr_cfg.txt
+dos2unix -f  ../tenb_commonplatform/configfiles/*
+
+cp -rf ../build/wr_cfg.txt $oampath/rsys/config/
+cp -rf ../tenb_commonplatform/configfiles/* $oampath/rsys/config
+
+chmod 777 $oampath/rsys/config/*
+
+#scripts
+#dos2unix -f  ../lteremapp/remcl/nmmscripts/*
+dos2unix -f  ../tenb_commonplatform/scripts/s*
+dos2unix -f  ../tenb_commonplatform/scripts/f*
+dos2unix -f  ../tenb_commonplatform/scripts/u*
+dos2unix -f  ../tenb_commonplatform/scripts/i*
+dos2unix -f  ../tenb_commonplatform/scripts/b*
+dos2unix -f  ../tenb_commonplatform/scripts/restartSyncMgr.sh
+dos2unix -f  ../tenb_commonplatform/scripts/reboot-fap
+
+#cp -rf ../lteremapp/remcl/nmmscripts/* $oampath/rsys/scripts/
+cp -rf ../tenb_commonplatform/scripts/s* $oampath/rsys/scripts
+cp -rf ../tenb_commonplatform/scripts/f* $oampath/rsys/scripts
+cp -rf ../tenb_commonplatform/scripts/u* $oampath/rsys/scripts
+cp -rf ../tenb_commonplatform/scripts/i* $oampath/rsys/scripts
+cp -rf ../tenb_commonplatform/scripts/b* $oampath/rsys/scripts
+cp -rf ../tenb_commonplatform/scripts/restartSyncMgr.sh $oampath/rsys/scripts
+cp -rf ../tenb_commonplatform/scripts/reboot-fap $oampath/rsys/scripts
+cp -rf ../tenb_commonplatform/software/misc/iPsec_Scripts/updown.tenpin $oampath/rsys/scripts/
+
+chmod 777 $oampath/rsys/scripts/*
+
+echo "***************************************************************"
+echo "                         TRANSFER COMPLETE                     "
+echo "Please customise and execute start_TeNB to execute the binaries"
+echo "***************************************************************"
+
+###############################################################################
+
+elif [ $1 = 'mspd' ]; then
+
+if [ -z "$ARM_DIR" ]; then
+    echo "\$ARM_DIR is not set, please set this env variable."
+    echo "If path /usr/ccpu/usr/local/arm/4.3.2/ is valid, set it to \$ARM_DIR or set appropriate valid arm path."
+    exit 1
+fi
+echo "Please enter the path where the build is to be copied"
+read oampath
+mkdir -p $oampath
+chmod 777 $oampath
+
+mkdir $oampath/rsys
+mkdir $oampath/rsys/bin
+mkdir $oampath/rsys/scripts
+mkdir $oampath/rsys/lib
+mkdir $oampath/rsys/config
+
+#Setting the Environment arm path
+ARM_LIB=$ARM_DIR/arm-none-linux-gnueabi/libc/usr/lib
+echo "ARM_LIB PATH= $ARM_LIB"
+echo "The build will be copied to $oampath"
+sleep 2
+
+# libraries
+cp -rf ../../tenb_commonplatform/software/libs/common/mib-common/obj/hbs2-iu/hbs2-4/arm-none-linux-gnueabi/libRadisys-mib-common.so $oampath/rsys/lib
+cp -rf ../../tenb_commonplatform/software/libs/common/mobnet/obj/hbs2-4/arm-none-linux-gnueabi/libthreeway-mobnet.so   $oampath/rsys/lib
+cp -rf ../../tenb_commonplatform/software/libs/common/comms/obj/hbs2-4/arm-none-linux-gnueabi/libthreeway-comms.so  $oampath/rsys/lib
+cp -rf ../../tenb_commonplatform/software/libs/common/system/obj/hbs2-4/arm-none-linux-gnueabi/libthreeway-system.so $oampath/rsys/lib
+cp -rf ../../tenb_commonplatform/software/libs/messaging/obj/hbs2-iu/hbs2-4/arm-none-linux-gnueabi/libthreeway-messaging.so  $oampath/rsys/lib
+cp -rf ../../tenb_commonplatform/software/libs/mib-core/obj/hbs2-iu/hbs2-4/arm-none-linux-gnueabi/libRadisys-mib-core.so $oampath/rsys/lib
+cp -rf ../../tenb_commonplatform/software/thirdparty/md5/obj/hbs2-4/arm-none-linux-gnueabi/libmd5.so $oampath/rsys/lib
+cp -rf ../../tenb_commonplatform/software/thirdparty/kb_getc/obj/hbs2-4/arm-none-linux-gnueabi/libkb_getc.so $oampath/rsys/lib
+cp -f ../../tenb_commonplatform/software/thirdparty/openssl-0.9.8/openssl-0.9.8r/lib/libcrypto.so $oampath/rsys/lib
+cp -rf ../../tenb_commonplatform/software/apps/fap/management/oam-sm/obj/hbs2-4/arm-none-linux-gnueabi/libsm.so $oampath/rsys/lib
+cp -L $ARM_LIB/libstdc++.so.6 $oampath/rsys/lib
+cp -L $ARM_DIR/arm-none-linux-gnueabi/libc/armv4t/lib/libc-2.8.so $oampath/rsys/lib
+
+chmod 777 $oampath/rsys/lib/*
+
+#Binaries
+cp -rf ../../enbapp/build/obj/enodeb $oampath/rsys/bin
+cp -rf ../../lteremapp/obj/hbs2-iu/hbs2-4/arm-none-linux-gnueabi/rem $oampath/rsys/bin
+cp -rf ../../tenb_commonplatform/software/apps/fap/management/oam/obj/hbs2-iu/hbs2-4/arm-none-linux-gnueabi/oam $oampath/rsys/bin
+cp -rf ../../tenb_commonplatform/software/apps/fap/management/tr069-v2/obj/hbs2-iu/hbs2-4/arm-none-linux-gnueabi/tr069-v2 $oampath/rsys/bin
+cp -rf ../../tenb_commonplatform/software/apps/fap/post-office/obj/hbs2-iu/hbs2-4/arm-none-linux-gnueabi/post-office $oampath/rsys/bin
+cp -rf ../../tenb_commonplatform/software/apps/utilities/cli/obj/hbs2-iu/hbs2-4/arm-none-linux-gnueabi/cli $oampath/rsys/bin
+cp -rf ../../tenb_commonplatform/software/apps/fap/management/update/obj/hbs2-iu/hbs2-4/arm-none-linux-gnueabi/fileTransMgr $oampath/rsys/bin
+cp -rf ../../tenb_commonplatform/software/apps/fap/tenpin/obj/hbs2-iu/hbs2-4/arm-none-linux-gnueabi/tenpin $oampath/rsys/bin/
+cp -rf ../../tenb_commonplatform/software/apps/fap/ike-tunnel-ind/obj/hbs2-iu/hbs2-4/arm-none-linux-gnueabi/ike-tunnel-ind $oampath/rsys/bin
+cp -rf ../../watchdog/obj/hbs2-iu/hbs2-4/arm-none-linux-gnueabi/watchdogd $oampath/rsys/bin/
+
+chmod 777 $oampath/rsys/bin/*
+
+# configuration files
+dos2unix ../../enbapp/build/wr_cfg.txt
+dos2unix ../../tenb_commonplatform/configfiles/*
+
+cp -rf ../../enbapp/build/wr_cfg.txt $oampath/rsys/config/
+cp -rf ../../tenb_commonplatform/configfiles/* $oampath/rsys/config
+
+chmod 777 $oampath/rsys/config/*
+
+#scripts
+dos2unix ../../lteremapp/remcl/mindspeed/nmmscripts/*
+dos2unix ../../tenb_commonplatform/scripts/s*
+dos2unix ../../tenb_commonplatform/scripts/f*
+dos2unix ../../tenb_commonplatform/scripts/u*
+dos2unix ../../tenb_commonplatform/scripts/i*
+dos2unix ../../tenb_commonplatform/scripts/b*
+dos2unix ../../tenb_commonplatform/scripts/restartSyncMgr.sh
+dos2unix ../../tenb_commonplatform/scripts/reboot-fap
+
+cp -rf ../../lteremapp/remcl/mindspeed/nmmscripts/* $oampath/rsys/scripts/
+cp -rf ../../tenb_commonplatform/scripts/s* $oampath/rsys/scripts
+cp -rf ../../tenb_commonplatform/scripts/f* $oampath/rsys/scripts
+cp -rf ../../tenb_commonplatform/scripts/u* $oampath/rsys/scripts
+cp -rf ../../tenb_commonplatform/scripts/i* $oampath/rsys/scripts
+cp -rf ../../tenb_commonplatform/scripts/b* $oampath/rsys/scripts
+cp -rf ../../tenb_commonplatform/scripts/restartSyncMgr.sh $oampath/rsys/scripts
+cp -rf ../../tenb_commonplatform/scripts/reboot-fap $oampath/rsys/scripts
+cp -rf ../../tenb_commonplatform/software/misc/iPsec_Scripts/updown.tenpin $oampath/rsys/scripts/
+
+chmod 777 $oampath/rsys/scripts/*
+
+echo "***************************************************************"
+echo "                         TRANSFER COMPLETE                     "
+echo "Please customise and execute start_TeNB to execute the binaries"
+echo "***************************************************************"
+
+###############################################################################
+
+elif [ $1 = 'brcm' ]; then
+echo "Please enter the path where the build is to be copied"
+read oampath
+mkdir -p $oampath
+chmod 777 $oampath
+
+mkdir -p $oampath/rsys
+mkdir -p $oampath/rsys/bin
+mkdir -p $oampath/rsys/scripts
+mkdir -p $oampath/rsys/lib
+mkdir -p $oampath/rsys/config
+
+echo "The build will be copied to $oampath"
+sleep 2
+
+# libraries
+cp -rf ../../tenb_commonplatform/software/libs/common/mib-common/obj/hbs2-iu/hbs2-4/mipsel-unknown-linux-gnu/libRadisys-mib-common.so $oampath/rsys/lib
+cp -rf ../../tenb_commonplatform/software/libs/common/mobnet/obj/hbs2-4/mipsel-unknown-linux-gnu/libthreeway-mobnet.so   $oampath/rsys/lib
+cp -rf ../../tenb_commonplatform/software/libs/common/comms/obj/hbs2-4/mipsel-unknown-linux-gnu/libthreeway-comms.so  $oampath/rsys/lib
+cp -rf ../../tenb_commonplatform/software/libs/common/system/obj/hbs2-4/mipsel-unknown-linux-gnu/libthreeway-system.so $oampath/rsys/lib
+cp -rf ../../tenb_commonplatform/software/libs/messaging/obj/hbs2-iu/hbs2-4/mipsel-unknown-linux-gnu/libthreeway-messaging.so  $oampath/rsys/lib
+cp -rf ../../tenb_commonplatform/software/libs/mib-core/obj/hbs2-iu/hbs2-4/mipsel-unknown-linux-gnu/libRadisys-mib-core.so $oampath/rsys/lib
+cp -rf ../../tenb_commonplatform/software/thirdparty/md5/obj/hbs2-4/mipsel-unknown-linux-gnu/libmd5.so $oampath/rsys/lib
+cp -rf ../../tenb_commonplatform/software/thirdparty/kb_getc/obj/hbs2-4/mipsel-unknown-linux-gnu/libkb_getc.so $oampath/rsys/lib
+cp -f ../../tenb_commonplatform/software/thirdparty/openssl-0.9.8/openssl-0.9.8rm/lib/libcrypto.so.0.9.8 $oampath/rsys/lib
+cp -rf ../../tenb_commonplatform/software/apps/fap/management/oam-sm/obj/hbs2-4/mipsel-unknown-linux-gnu/libsm.so $oampath/rsys/lib
+
+chmod 777 $oampath/rsys/lib/*
+
+# binaries
+cp -rf ../../tenb_commonplatform/software/apps/fap/management/oam/obj/hbs2-iu/hbs2-4/mipsel-unknown-linux-gnu/oam $oampath/rsys/bin
+cp -rf ../../tenb_commonplatform/software/apps/fap/management/tr069-v2/obj/hbs2-iu/hbs2-4/mipsel-unknown-linux-gnu/tr069-v2 $oampath/rsys/bin
+cp -rf ../../tenb_commonplatform/software/apps/fap/post-office/obj/hbs2-iu/hbs2-4/mipsel-unknown-linux-gnu/post-office $oampath/rsys/bin
+cp -rf ../../tenb_commonplatform/software/apps/utilities/cli/obj/hbs2-iu/hbs2-4/mipsel-unknown-linux-gnu/cli $oampath/rsys/bin
+cp -rf ../../tenb_commonplatform/software/apps/fap/management/update/obj/hbs2-iu/hbs2-4/mipsel-unknown-linux-gnu/fileTransMgr $oampath/rsys/bin
+cp -rf ../../tenb_commonplatform/software/apps/fap/tenpin/obj/hbs2-iu/hbs2-4/mipsel-unknown-linux-gnu/tenpin $oampath/rsys/bin/
+cp -rf ../../tenb_commonplatform/software/apps/fap/ike-tunnel-ind/obj/hbs2-iu/hbs2-4/mipsel-unknown-linux-gnu/ike-tunnel-ind $oampath/rsys/bin
+cp -f ../../watchdog/obj/hbs2-iu/hbs2-4/mipsel-unknown-linux-gnu/watchdogd $oampath/rsys/bin
+cp -f ../../lteremapp/obj/hbs2-iu/hbs2-4/mipsel-unknown-linux-gnu/rem $oampath/rsys/bin
+
+chmod 777 $oampath/rsys/bin/*
+
+# configuration files
+dos2unix ../../tenb_commonplatform/configfiles/*
+dos2unix ../../enbapp/build/wr_cfg.txt
+cp -rf ../../tenb_commonplatform/configfiles/* $oampath/rsys/config
+cp -rf ../../enbapp/build/wr_cfg.txt $oampath/rsys/config
+
+chmod 777 $oampath/rsys/config/*
+
+#scripts
+dos2unix ../../tenb_commonplatform/scripts/s*
+dos2unix ../../tenb_commonplatform/scripts/f*
+dos2unix ../../tenb_commonplatform/scripts/u*
+dos2unix ../../tenb_commonplatform/scripts/i*
+dos2unix ../../tenb_commonplatform/scripts/b*
+dos2unix ../../tenb_commonplatform/scripts/restartSyncMgr.sh
+dos2unix ../../tenb_commonplatform/scripts/reboot-fap
+dos2unix ../../tenb_commonplatform/software/misc/iPsec_Scripts/updown.tenpin 
+cp -rf ../../tenb_commonplatform/scripts/s* $oampath/rsys/scripts
+cp -rf ../../tenb_commonplatform/scripts/f* $oampath/rsys/scripts
+cp -rf ../../tenb_commonplatform/scripts/u* $oampath/rsys/scripts
+cp -rf ../../tenb_commonplatform/scripts/i* $oampath/rsys/scripts
+cp -rf ../../tenb_commonplatform/scripts/b* $oampath/rsys/scripts
+cp -rf ../../tenb_commonplatform/scripts/restartSyncMgr.sh $oampath/rsys/scripts
+cp -rf ../../tenb_commonplatform/scripts/reboot-fap $oampath/rsys/scripts
+cp -f ../../tenb_commonplatform/software/misc/iPsec_Scripts/updown.tenpin $oampath/rsys/scripts/
+
+chmod 777 $oampath/rsys/scripts/*
+
+echo "***************************************************************"
+echo "                         TRANSFER COMPLETE                     "
+echo "Please customise and execute start_TeNB to execute the binaries"
+echo "***************************************************************"
+
+###############################################################################
+
+elif [ $1 = 'linux' ]; then
+echo "Please enter the path where the build is to be copied"
+read oampath
+mkdir -p $oampath
+chmod 777 $oampath/rsys
+
+mkdir -p $oampath/rsys
+mkdir -p $oampath/rsys/bin
+mkdir -p $oampath/rsys/scripts
+mkdir -p $oampath/rsys/lib
+mkdir -p $oampath/rsys/config
+
+echo "The build will be copied to $oampath/rsys"
+sleep 2
+
+# libraries
+cp -rf ../../tenb_commonplatform/software/libs/common/mib-common/obj/generic/generic/i686-linux/libRadisys-mib-common.so $oampath/rsys/lib
+cp -rf ../../tenb_commonplatform/software/libs/common/mobnet/obj/generic/i686-linux/libthreeway-mobnet.so $oampath/rsys/lib
+cp -rf ../../tenb_commonplatform/software/libs/common/comms/obj/generic/i686-linux/libthreeway-comms.so $oampath/rsys/lib
+cp -rf ../../tenb_commonplatform/software/libs/common/system/obj/generic/i686-linux/libthreeway-system.so $oampath/rsys/lib
+cp -rf ../../tenb_commonplatform/software/libs/messaging/obj/generic/generic/i686-linux/libthreeway-messaging.so $oampath/rsys/lib
+cp -rf ../../tenb_commonplatform/software/libs/mib-core/obj/generic/generic/i686-linux/libRadisys-mib-core.so $oampath/rsys/lib
+cp -f ../../tenb_commonplatform/software/thirdparty/openssl-0.9.8/openssl-0.9.8rl/lib/libcrypto.so.0.9.8 $oampath/rsys/lib
+cp -rf ../../tenb_commonplatform/software/apps/fap/management/oam-sm/obj/generic/i686-linux/libsm.so $oampath/rsys/lib
+cp -rf ../../tenb_commonplatform/software/thirdparty/kb_getc/obj/generic/i686-linux/libkb_getc.so $oampath/rsys/lib
+cp -rf ../../tenb_commonplatform/software/thirdparty/md5/obj/generic/i686-linux/libmd5.so $oampath/rsys/lib
+
+chmod 777 $oampath/rsys/lib/*
+
+# binaries
+cp -rf ../../enbapp/build/obj/enodeb $oampath/rsys/bin
+cp -rf ../../tenb_commonplatform/software/apps/fap/management/oam/obj/generic/generic/i686-linux/oam $oampath/rsys/bin
+cp -rf ../../tenb_commonplatform/software/apps/fap/management/tr069-v2/obj/generic/generic/i686-linux/tr069-v2 $oampath/rsys/bin
+cp -rf ../../tenb_commonplatform/software/apps/fap/post-office/obj/generic/generic/i686-linux/post-office $oampath/rsys/bin
+cp -rf ../../tenb_commonplatform/software/apps/utilities/cli/obj/generic/generic/i686-linux/cli $oampath/rsys/bin
+cp -rf ../../tenb_commonplatform/software/apps/fap/management/update/obj/generic/generic/i686-linux/fileTransMgr $oampath/rsys/bin
+cp -rf ../../tenb_commonplatform/software/apps/fap/tenpin/obj/generic/generic/i686-linux/tenpin $oampath/rsys/bin
+cp -rf ../../tenb_commonplatform/software/apps/fap/ike-tunnel-ind/obj/generic/generic/i686-linux/ike-tunnel-ind $oampath/rsys/bin
+cp -rf ../../watchdog/obj/hbs2-iu/hbs2-4/arm-none-linux-gnueabi/watchdogd $oampath/rsys/bin
+
+chmod 777 $oampath/rsys/bin/*
+
+# configuration files
+dos2unix ../../tenb_commonplatform/configfiles/*
+dos2unix ../../enbapp/build/wr_cfg.txt
+dos2unix ../../enbapp/build/ys_cfg.txt
+cp -rf ../../tenb_commonplatform/configfiles/* $oampath/rsys/config
+cp -rf ../../enbapp/build/wr_cfg.txt $oampath/rsys/config
+cp -rf ../../enbapp/build/ys_cfg.txt $oampath/rsys/config
+
+chmod 777 $oampath/rsys/config/*
+
+#scripts
+dos2unix ../../tenb_commonplatform/scripts/s*
+dos2unix ../../tenb_commonplatform/scripts/f*
+dos2unix ../../tenb_commonplatform/scripts/u*
+dos2unix ../../tenb_commonplatform/scripts/i*
+dos2unix ../../tenb_commonplatform/scripts/b*
+dos2unix ../../tenb_commonplatform/scripts/restartSyncMgr.sh
+dos2unix ../../tenb_commonplatform/scripts/reboot-fap
+dos2unix ../../tenb_commonplatform/software/misc/iPsec_Scripts/updown.tenpin 
+cp -rf ../../tenb_commonplatform/scripts/s* $oampath/rsys/scripts
+cp -rf ../../tenb_commonplatform/scripts/f* $oampath/rsys/scripts
+cp -rf ../../tenb_commonplatform/scripts/u* $oampath/rsys/scripts
+cp -rf ../../tenb_commonplatform/scripts/i* $oampath/rsys/scripts
+cp -rf ../../tenb_commonplatform/scripts/b* $oampath/rsys/scripts
+cp -rf ../../tenb_commonplatform/scripts/restartSyncMgr.sh $oampath/rsys/scripts
+cp -rf ../../tenb_commonplatform/scripts/reboot-fap $oampath/rsys/scripts
+cp -f ../../tenb_commonplatform/software/misc/iPsec_Scripts/updown.tenpin $oampath/rsys/scripts/
+
+chmod 777 $oampath/rsys/scripts/*
+
+echo "***************************************************************"
+echo "                         TRANSFER COMPLETE                     "
+echo "Please customise and execute start_TeNB to execute the binaries"
+echo "***************************************************************"
+else
+echo "Usage is ./TeNBCP_build mspd "
+echo "           or                "
+echo "Usage is ./TeNBCP_build linux"
+exit
+fi

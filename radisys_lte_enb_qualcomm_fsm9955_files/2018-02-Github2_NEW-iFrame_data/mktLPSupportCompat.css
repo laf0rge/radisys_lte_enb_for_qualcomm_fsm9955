@@ -1,0 +1,79 @@
+/** A version of mktLPSupport.css designed to make old landing pages compatible with 
+    new responsive landing page templates */
+div.boxSpan {
+  overflow: hidden;
+}
+span.lpContentsItem.richTextSpan {
+  display: block;
+}
+span.lpContentsItem p:first-child{
+  margin-top: 0px;
+}
+
+a.lpImageLink img {
+  border: none;
+}
+form.lpeRegForm {
+  margin: 0px;
+  padding: 0px;
+}
+form.lpeRegForm ul {
+  margin: 0px;
+  padding: 0px;
+  list-style: none;
+}
+form.lpeRegForm li {
+  margin: 0px;
+  padding: 1px 10px 3px 10px;
+  list-style: none;
+  clear: both;
+}
+form.lpeRegForm label {
+  padding-right: 20px;
+  float: left;
+  text-align: left;
+}
+form.lpeRegForm li.mktLblRight label {
+  float: none;
+}
+form.lpeRegForm li.mktLblRight input[type='checkbox'] {
+  position: relative;
+  left: -4px;
+}
+
+form.lpeRegForm ul.mktLblCenter label {
+  text-align: right;
+}
+form.lpeRegForm ul.mktLblAbove span.mktInput {
+  clear: both;
+}
+form.lpeRegForm ul.mktLblAbove label {
+  padding-left: 10px;
+}
+form.lpeRegForm ul.mktLblAbove li.mktFormReq label {
+  background:  url(/images/forms/backRequiredGray.gif) no-repeat -5px 0px;
+}
+form.lpeRegForm ul.mktLblAbove li#mktFrmButtons label {
+  display: none;
+}
+form.lpeRegForm li.mktFormReq label {
+  font-weight: bold;
+  background:  url(/images/forms/backRequiredGray.gif) no-repeat right 0px;
+}
+span.mktError {
+  text-align: left;
+  position: relative;
+}
+span.mktError input {
+  background: #ECEFFF;
+}
+span.mktError span.mktFormMsg {
+  display: inline;
+  position: absolute;
+  top: 2px;
+  left: 4px;
+  xcolor: #8C8FFF;
+  color: red;
+  font-size: small;
+  width: 200px;
+}

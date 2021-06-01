@@ -1,0 +1,21 @@
+# All rights reserved
+
+PREFIX=arm-none-linux-gnueabi-
+ARCH = cortex-a9
+#
+# Tool definitions
+#
+CC = $(PREFIX)gcc
+LD = $(PREFIX)ld
+AR = $(PREFIX)ar
+#
+# Tool settings
+#
+DEFS = -DLTE -DC4KEVM -DUSE_LINUX -DSTUB -DFDX_RT -DXUSE_RPC -DARM_OPTIMIZE
+OPT = -O3
+#CFLAGS = -mtune=$(ARCH) -Wall $(DEFS) $(OPT)
+CFLAGS = -Wall $(DEFS) $(OPT)
+ASFLAGS = $(DEFS) $(INC) -Wa,-mcpu=$(ARCH),-ac
+LDFLAGS = -Wl
+ARFLAGS = rcs
+

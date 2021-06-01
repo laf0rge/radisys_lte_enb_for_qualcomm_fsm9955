@@ -1,0 +1,202 @@
+#/********************************************************************16**
+#
+#            (c) Copyright 2012 by RadiSys Corporation. All rights reserved.
+#
+#     This software is confidential and proprietary to RadiSys Corporation.
+#     No part of this software may be reproduced, stored, transmitted, 
+#     disclosed or used in any form or by any means other than as expressly
+#     provided by the written Software License Agreement between Radisys 
+#     and its licensee.
+#
+#     Radisys warrants that for a period, as provided by the written
+#     Software License Agreement between Radisys and its licensee, this
+#     software will perform substantially to Radisys specifications as
+#     published at the time of shipment, exclusive of any updates or 
+#     upgrades, and the media used for delivery of this software will be 
+#     free from defects in materials and workmanship.  Radisys also warrants 
+#     that has the corporate authority to enter into and perform under the 
+#     Software License Agreement and it is the copyright owner of the software 
+#     as originally delivered to its licensee.
+#
+#     RADISYS MAKES NO OTHER WARRANTIES, EXPRESS OR IMPLIED, INCLUDING
+#     WITHOUT LIMITATION WARRANTIES OF MERCHANTABILITY OR FITNESS FOR
+#     A PARTICULAR PURPOSE WITH REGARD TO THIS SOFTWARE, SERVICE OR ANY RELATED
+#     MATERIALS.
+#
+#     IN NO EVENT SHALL RADISYS BE LIABLE FOR ANY INDIRECT, SPECIAL,
+#     CONSEQUENTIAL DAMAGES, OR PUNITIVE DAMAGES IN CONNECTION WITH OR ARISING
+#     OUT OF THE USE OF, OR INABILITY TO USE, THIS SOFTWARE, WHETHER BASED
+#     ON BREACH OF CONTRACT, TORT (INCLUDING NEGLIGENCE), PRODUCT
+#     LIABILITY, OR OTHERWISE, AND WHETHER OR NOT IT HAS BEEN ADVISED
+#     OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+#                       Restricted Rights Legend:
+#
+#     This software and all related materials licensed hereby are
+#     classified as "restricted computer software" as defined in clause
+#     52.227-19 of the Federal Acquisition Regulation ("FAR") and were
+#     developed entirely at private expense for nongovernmental purposes,
+#     are commercial in nature and have been regularly used for
+#     nongovernmental purposes, and, to the extent not published and
+#     copyrighted, are trade secrets and confidential and are provided
+#     with all rights reserved under the copyright laws of the United
+#     States.  The government's rights to the software and related
+#     materials are limited and restricted as provided in clause
+#     52.227-19 of the FAR.
+#
+#                    IMPORTANT LIMITATION(S) ON USE
+#
+#     The use of this software is limited to the use set
+#     forth in the written Software License Agreement between Radisys and
+#     its Licensee. Among other things, the use of this software
+#     may be limited to a particular type of Designated Equipment, as 
+#     defined in such Software License Agreement.
+#     Before any installation, use or transfer of this software, please
+#     consult the written Software License Agreement or contact Radisys at
+#     the location set forth below in order to confirm that you are
+#     engaging in a permissible use of the software.
+#
+#                    RadiSys Corporation
+#                    Tel: +1 (858) 882 8800
+#                    Fax: +1 (858) 777 3388
+#                    Email: support@trillium.com
+#                    Web: http://www.radisys.com 
+# 
+#*********************************************************************17*/
+# Makefile for building REM as Static Library
+#
+# All rights reserved
+#
+#For making arm library   ---->    make PRODUCT=hbs2-iu HARDWARE=hbs2-4 BUILD=arm-none-linux-gnueabi
+#For cleaning arm library ---->    make clean PRODUCT=hbs2-iu HARDWARE=hbs2-4 BUILD=arm-none-linux-gnueabi
+#For making linux library ---->    make PRODUCT=hbs2-iu HARDWARE=hbs2-4 BUILD=i686-linux
+#For cleaning linux library -->    make clean PRODUCT=hbs2-iu HARDWARE=hbs2-4 BUILD=i686-linux
+#For making mipsel library ---->    make PRODUCT=hbs2-iu HARDWARE=hbs2-4 BUILD=mipsel-unknown-linux-gnu
+
+ifeq ($(BUILD),i686-linux)
+PREFIX=
+endif
+ 
+ifeq ($(BUILD),arm-none-linux-gnueabi)
+PREFIX=arm-none-linux-gnueabi-
+endif
+ 
+ifeq ($(BUILD),mipsel-unknown-linux-gnu)
+PREFIX=mipsel-unknown-linux-gnu-
+endif
+
+CWD:=$(shell pwd)
+CPPFILES = $(shell pwd)/src
+PATH_REMCL=$(CWD)/remcl/src
+CP := cp -f
+RM := rm -f
+MAKE := make
+ARCH = cortex-a9
+ 
+#
+# Tool definitions
+#
+CC = $(PREFIX)g++
+#CC = gcc
+AS = $(PREFIX)g++ -x assembler-with-cpp -c
+LD = $(PREFIX)g++
+AR = $(PREFIX)ar
+ 
+#
+# Tool settings
+#
+DEFS = -DLTE -DC4KEVM -DUSE_LINUX -DSTUB -DFDX_RT -DXUSE_RPC -DARM_OPTIMIZE
+OPT = -O3
+#CFLAGS = -mtune=$(ARCH) -Wall $(DEFS) $(OPT)
+CFLAGS = -Wall $(DEFS) $(OPT)
+ASFLAGS = $(DEFS) $(INC) -Wa,-mcpu=$(ARCH),-ac
+LDFLAGS = -Wl
+ARFLAGS = rcs
+
+INCL_PATH1 = $(shell pwd)/inc/ 
+INCL_PATH2 = $(shell pwd)/remcl/inc/ 
+INCL_PATH3 = $(shell pwd)/../cm/ 
+INCL_PATH4 = $(shell pwd)/../mt/ 
+INCL_PATH = $(INCL_PATH1) $(INCL_PATH2) $(INCL_PATH3) $(INCL_PATH4) 
+
+TARGET=librem.a
+
+newall: librcl $(TARGET)
+
+###compiling and copying the REMCL 
+librcl:
+	cd $(PATH_REMCL); $(MAKE) -f Makefile
+	$(CP) $(PATH_REMCL)/libremcl.a ./libs/$(BUILD)/
+
+all:  $(TARGET) 
+
+LDFLAGS=-lssi -lrt -lremcl
+LIB_PATHS = -L$(CWD)/libs/$(BUILD)
+SYSTEM_LIBS = pthread
+
+vpath $(shell pwd)/src/%.cpp $(shell pwd)/inc/%.h $(INCL_PATH)
+VPATH = $(CPPFILES) $(INCL_PATH)
+#
+# Source files
+#
+CPPSRC = rem_eventhandler.cpp rem_interface.cpp rem_lte_rrcmsg_decoder.cpp rem_wcdma_event_handler.cpp rem_fsm.cpp rem_lte_event_handler.cpp rem_lteconfig.cpp rem_wcdmaconfig.cpp rem_3g_rrcmsg_decoder.cpp
+
+ASRC =
+
+#
+# Object files
+#
+OBJS = $(CPPSRC:.cpp=.o) $(ASRC:.s=.o)
+OBJS_ALL = $(addprefix ./obj/$(PRODUCT)/$(HARDWARE)/$(BUILD)/,$(OBJS))
+#
+# Include files
+#
+INC = -I$(INCL_PATH2) -I$(INCL_PATH1) -I$(INCL_PATH3) -I$(INCL_PATH4)
+#
+# Default target
+#
+
+CPPFLAGS = -Dlinux -DSVN_VERSION=\"$(SVN_VERSION)\" -g3 -Dx__ARMCC_VERSION -DLTE_REM -UUSE_RADISYS_OAM -DDEBUG_PRINT -L/usr/lib/i386-linux-gnu/ 
+
+$(TARGET): $(OBJS)
+	echo ******** BUILDING REM LIBRARY ************
+	$(AR) $(ARFLAGS) $(TARGET) $(OBJS_ALL) ./libs/$(BUILD)/libremcl.a  ./libs/$(BUILD)/libssi.a
+	mv librem.a ./obj/$(PRODUCT)/$(HARDWARE)/$(BUILD)
+
+#	$(CC) $(LIB_PATHS) $(LDFLAGS) $(OBJS) -o $@
+
+
+#
+# Default rule for building object files from source code
+
+buildrem: $(OBJS)
+		$(CC) $(CFLAGS) $(CPPFLAGS) $(INC) -c $@
+
+#.cpp.o:
+#	$(CC) $(CFLAGS) $(CPPFLAGS) $(INC) -c $< -o $@
+
+%.o :	%.cpp
+	@mkdir -p obj
+	@mkdir -p obj/$(PRODUCT)
+	@mkdir -p obj/$(PRODUCT)/$(HARDWARE)
+	@mkdir -p obj/$(PRODUCT)/$(HARDWARE)/$(BUILD)
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(INC) -c $< -o ./obj/$(PRODUCT)/$(HARDWARE)/$(BUILD)/$@
+#	$(CC) $(CFLAGS) $(CPPFLAGS) $(INC) -c $< -o ./src/$@
+
+.s.o:
+	$(AS) $(ASFLAGS) $(INC) $< -o $@
+
+#
+#	.cpp.o:
+#		$(CC) $(CFLAGS) $(CPPFLAGS) $(INC) -c $< -o $@
+#
+#.s.o:
+#	$(AS) $(ASFLAGS) $(INC) $< -o $@
+
+.PHONY : clean
+clean:
+	-$(RM) $(OBJS_ALL)
+	-$(RM) $(PATH_REMCL)/*.o
+	-$(RM) $(PATH_REMCL)/libremcl.a
+	-$(RM) ./obj/$(PRODUCT)/$(HARDWARE)/$(BUILD)/librem.a
+	-$(RM) ./libs/$(BUILD)/libremcl.a

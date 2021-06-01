@@ -1,0 +1,31 @@
+***************
+*** 109,116 ****
+  #define SSSWMV 3              /* main version */
+  #define SSSWMR 1              /* main revision */
+  #define SSSWBV 0              /* branch version */
+! /* ss015.301 : Modified for patch 15 */
+! #define SSSWBR 15            /* branch revision */
+  #define SSSWPN "1078001"      /* part number */
+  
+  
+--- 109,116 ----
+  #define SSSWMV 3              /* main version */
+  #define SSSWMR 1              /* main revision */
+  #define SSSWBV 0              /* branch version */
+! /* ss014.301 : Modified for patch 14 */
+! #define SSSWBR 14            /* branch revision */
+  #define SSSWPN "1078001"      /* part number */
+  
+  
+***************
+*** 216,220 ****
+  /main/3+  ss012.301 ssahniX   Updated brach revision 
+  /main/3+  ss013.301 mkumar    Updated brach revision 
+  /main/3+  ss014.301 ssahniX   Updated branch revision 
+- /main/3+  ss015.301 akapoor   Updated branch revision 
+  *********************************************************************91*/
+--- 216,219 ----
+  /main/3+  ss012.301 ssahniX   Updated brach revision 
+  /main/3+  ss013.301 mkumar    Updated brach revision 
+  /main/3+  ss014.301 ssahniX   Updated branch revision 
+  *********************************************************************91*/

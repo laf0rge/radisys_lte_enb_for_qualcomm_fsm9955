@@ -1,0 +1,2 @@
+ulimit -s unlimited
+./enodeb

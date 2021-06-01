@@ -1,0 +1,828 @@
+***************
+*** 125,144 ****
+  /* Forward declarations */
+  
+  /* ss041.103 Declaration for STmrRegHndlr */
+- /* ss015.301 Changed the timer activation function type as all timer activation
+-  * functions are enclosed in a union. 
+-  */
+  #ifndef SS_MULTIPLE_PROCS
+  PRIVATE S16 STmrRegHndlr ARGS((
+           Ent ent,
+           Inst inst,
+           S16 period,
+           S16 units,
+!          SsTmrActvFn ssTmrActvFn
+        ));
+! /* ss015.301: Removed the timer handler prototypes guarded under SS_MT_TMR and 
+!  * handled mtFlag in existing timer handlers. 
+!  */
+  #else /* SS_MULTIPLE_PROCS */
+  PRIVATE S16 STmrRegHndlr ARGS((
+           ProcId proc,
+--- 125,149 ----
+  /* Forward declarations */
+  
+  /* ss041.103 Declaration for STmrRegHndlr */
+  #ifndef SS_MULTIPLE_PROCS
++ #ifndef SS_MT_TMR
+  PRIVATE S16 STmrRegHndlr ARGS((
+           Ent ent,
+           Inst inst,
+           S16 period,
+           S16 units,
+!          PFS16 tmrFnct
+        ));
+! #else /* SS_MT_TMR */
+! PRIVATE S16 STmrRegHndlr ARGS((
+!          Ent ent,
+!          Inst inst,
+!          S16 period,
+!          S16 units,
+!          Bool mtFlag,
+!          Void *tmrFnct
+!       ));
+! #endif /* SS_MT_TMR */
+  #else /* SS_MULTIPLE_PROCS */
+  PRIVATE S16 STmrRegHndlr ARGS((
+           ProcId proc,
+***************
+*** 146,167 ****
+           Inst inst,
+           S16 period,
+           S16 units,
+!          SsTmrActvFn ssTmrActvFn
+        ));
+  #endif /* SS_MULTIPLE_PROCS */
+  
+  /* ss041.103 Declaration for STmrDeregHndlr */
+  #ifndef SS_MULTIPLE_PROCS
+  PRIVATE S16 STmrDeregHndlr ARGS((
+           Ent ent,
+           Inst inst,
+           S16 period,
+           S16 units,
+!          SsTmrActvFn ssTmrActvFn
+        ));
+! /* ss015.301 Removed the timer handler prototypes guarded under SS_MT_TMR and 
+!  * handled mtFlag in existing timer handlers.
+!  */
+  #else /* SS_MULTIPLE_PROCS */
+  PRIVATE S16 STmrDeregHndlr ARGS((
+           ProcId proc,
+--- 151,180 ----
+           Inst inst,
+           S16 period,
+           S16 units,
+!          PAIFTMRS16 tmrFnct
+        ));
+  #endif /* SS_MULTIPLE_PROCS */
+  
+  /* ss041.103 Declaration for STmrDeregHndlr */
+  #ifndef SS_MULTIPLE_PROCS
++ #ifndef SS_MT_TMR
++ PRIVATE S16 STmrDeregHndlr ARGS((
++          Ent ent,
++          Inst inst,
++          S16 period,
++          S16 units,
++          PFS16 tmrFnct
++       ));
++ #else /* SS_MT_TMR */
+  PRIVATE S16 STmrDeregHndlr ARGS((
+           Ent ent,
+           Inst inst,
+           S16 period,
+           S16 units,
+!          Bool mtFlag,
+!          Void *tmrFnct
+        ));
+! #endif /* SS_MT_TMR */
+  #else /* SS_MULTIPLE_PROCS */
+  PRIVATE S16 STmrDeregHndlr ARGS((
+           ProcId proc,
+***************
+*** 169,175 ****
+           Inst inst,
+           S16 period,
+           S16 units,
+!          SsTmrActvFn ssTmrActvFn
+        ));
+  #endif /* SS_MULTIPLE_PROCS */
+  
+--- 182,188 ----
+           Inst inst,
+           S16 period,
+           S16 units,
+!          PAIFTMRS16 tmrFnct
+        ));
+  #endif /* SS_MULTIPLE_PROCS */
+  
+***************
+*** 214,229 ****
+  PFS16 tmrFnct;              /* timer function, typically SActvTmr */
+  #endif
+  {
+! 	S16 ret;
+! 	/* ss015.301 - Enclosed all timer activation functions in a union. */
+! 	SsTmrActvFn ssTmrActvFn;
+! 	/* ss041.103 - Moved handling to STmrRegHndlr */
+  
+     TRC1(SRegCfgTmr);
+  
+!    ssTmrActvFn.mtFlag = FALSE;
+!    ssTmrActvFn.actvFnc.tmrActvFn = tmrFnct;
+!    ret = STmrRegHndlr(ent, inst, period, units, ssTmrActvFn);
+  
+     RETVALUE(ret);
+  }
+--- 227,243 ----
+  PFS16 tmrFnct;              /* timer function, typically SActvTmr */
+  #endif
+  {
+!    S16 ret;
+! 
+!    /* ss041.103 - Moved handling to STmrRegHndlr */
+  
+     TRC1(SRegCfgTmr);
+  
+! #ifdef SS_MT_TMR
+!    ret = STmrRegHndlr(ent, inst, period, units, FALSE, (Void *)tmrFnct);
+! #else
+!    ret = STmrRegHndlr(ent, inst, period, units, tmrFnct);
+! #endif
+  
+     RETVALUE(ret);
+  }
+***************
+*** 252,266 ****
+  
+  {
+     S16 ret;
+!    /* ss015.301 - Enclosed all timer activation functions in a union. */
+!    SsTmrActvFn ssTmrActvFn;
+     /* ss041.103 - Moved handling to STmrRegHndlr */
+  
+     TRC1(SRegCfgTmr);
+  
+!    ssTmrActvFn.mtFlag = FALSE;
+!    ssTmrActvFn.actvFnc.tmrActvFn = tmrFnct;
+!    ret = STmrRegHndlr(proc, ent, inst, period, units, ssTmrActvFn);
+  
+     RETVALUE(ret);
+  }
+--- 266,277 ----
+  
+  {
+     S16 ret;
+! 
+     /* ss041.103 - Moved handling to STmrRegHndlr */
+  
+     TRC1(SRegCfgTmr);
+  
+!    ret = STmrRegHndlr(proc, ent, inst, period, units, tmrFnct);
+  
+     RETVALUE(ret);
+  }
+***************
+*** 309,322 ****
+  #endif
+  {
+     S16 ret;
+-    /* ss015.301 - Enclosed all timer activation functions in a union. */
+-    SsTmrActvFn ssTmrActvFn;
+  
+     TRC1(SRegCfgTmrMt);
+  
+!    ssTmrActvFn.actvFnc.tmrActvFnMt = tmrFnctMt;
+!    ssTmrActvFn.mtFlag = TRUE;
+!    ret = STmrRegHndlr(ent, inst, period, units, ssTmrActvFn);
+  
+     RETVALUE(ret);
+  }
+--- 320,329 ----
+  #endif
+  {
+     S16 ret;
+  
+     TRC1(SRegCfgTmrMt);
+  
+!    ret = STmrRegHndlr(ent, inst, period, units, TRUE, (Void *)tmrFnctMt);
+  
+     RETVALUE(ret);
+  }
+***************
+*** 341,353 ****
+  *       File:  ss_timer.c
+  *
+  */
+- 
+- /* ss015.301 Changed the timer activation function type as all timer activation
+-  * functions are enclosed in a union.
+-  */
+- 
+  #ifndef SS_MULTIPLE_PROCS
+  
+  #ifdef ANSI
+  PRIVATE S16 STmrRegHndlr
+  (
+--- 348,356 ----
+  *       File:  ss_timer.c
+  *
+  */
+  #ifndef SS_MULTIPLE_PROCS
+  
++ #ifndef SS_MT_TMR
+  #ifdef ANSI
+  PRIVATE S16 STmrRegHndlr
+  (
+***************
+*** 355,373 ****
+  Inst inst,                  /* instance */
+  S16 period,                 /* period */
+  S16 units,                  /* period units */
+! SsTmrActvFn ssTmrActvFn               /* timer function, typically SActvTmr */
+  )
+  #else
+! PRIVATE S16 STmrRegHndlr(ent, inst, period, units, ssTmrActvFn)
+  Ent ent;                    /* entity */
+  Inst inst;                  /* instance */
+  S16 period;                 /* period */
+  S16 units;                  /* period units*/
+! SsTmrActvFn ssTmrActvFn;              /* timer function, typically SActvTmr */
+  #endif
+! /* ss015.301: Removed the timer handler prototypes guarded
+!  * under SS_MT_TMR and handled mtFlag in existing timer handlers.
+!  */
+  
+  #else /* SS_MULTIPLE_PROCS */
+  
+--- 358,394 ----
+  Inst inst,                  /* instance */
+  S16 period,                 /* period */
+  S16 units,                  /* period units */
+! PFS16 tmrFnct               /* timer function, typically SActvTmr */
+  )
+  #else
+! PRIVATE S16 STmrRegHndlr(ent, inst, period, units, tmrFnct)
+  Ent ent;                    /* entity */
+  Inst inst;                  /* instance */
+  S16 period;                 /* period */
+  S16 units;                  /* period units*/
+! PFS16 tmrFnct;              /* timer function, typically SActvTmr */
+  #endif
+! #else /* else of not SS_MT_TMR */
+! #ifdef ANSI
+! PRIVATE S16 STmrRegHndlr
+! (
+! Ent ent,                    /* entity */
+! Inst inst,                  /* instance */
+! S16 period,                 /* period */
+! S16 units,                  /* period units */
+! Bool mtFlag,                /* MT support */
+! Void *tmrFnct               /* timer function, typically SActvTmr */
+! )
+! #else
+! PRIVATE S16 STmrRegHndlr(ent, inst, period, units, mtFlag, tmrFnct)
+! Ent ent;                    /* entity */
+! Inst inst;                  /* instance */
+! S16 period;                 /* period */
+! S16 units;                  /* period units*/
+! Bool mtFlag;                /* MT support */
+! Void *tmrFnct;              /* timer function, typically SActvTmr */
+! #endif
+! #endif /* SS_MT_TMR */
+  
+  #else /* SS_MULTIPLE_PROCS */
+  
+***************
+*** 379,394 ****
+  Inst inst,                  /* instance */
+  S16 period,                 /* period */
+  S16 units,                  /* period units */
+! SsTmrActvFn ssTmrActvFn     /* timer function */
+  )
+  #else
+! PRIVATE S16 STmrRegHndlr(proc, ent, inst, period, units, ssTmrActvFn)
+  ProcId proc;                /* processor */
+  Ent ent;                    /* entity */
+  Inst inst;                  /* instance */
+  S16 period;                 /* period */
+  S16 units;                  /* period units*/
+! SsTmrActvFn ssTmrActvFn;         /* timer function */
+  #endif
+  
+  #endif /* SS_MULTIPLE_PROCS */
+--- 400,415 ----
+  Inst inst,                  /* instance */
+  S16 period,                 /* period */
+  S16 units,                  /* period units */
+! PAIFTMRS16 tmrFnct          /* timer function */
+  )
+  #else
+! PRIVATE S16 STmrRegHndlr(proc, ent, inst, period, units, tmrFnct)
+  ProcId proc;                /* processor */
+  Ent ent;                    /* entity */
+  Inst inst;                  /* instance */
+  S16 period;                 /* period */
+  S16 units;                  /* period units*/
+! PAIFTMRS16 tmrFnct;         /* timer function */
+  #endif
+  
+  #endif /* SS_MULTIPLE_PROCS */
+***************
+*** 436,466 ****
+        RETVALUE(RFAILED);
+     }
+  
+!    if(ssTmrActvFn.mtFlag == TRUE) 
+!    { 
+!    /* ss015.301 Enclosed all timer activation functions in a union. */
+! #ifndef SS_MULTIPLE_PROCS
+! #ifdef SS_MT_TMR
+!       if (ssTmrActvFn.actvFnc.tmrActvFnMt == NULLP)  
+!       {
+!          SSLOGERROR(ERRCLS_INT_PAR, ESS532, ERRZERO, "Null pointer");
+!          RETVALUE(RFAILED);
+!       }
+! #else
+!       RETVALUE(RFAILED);
+! #endif
+! #else
+        RETVALUE(RFAILED);
+- #endif
+     }
+-    else
+-    { 
+-       if (ssTmrActvFn.actvFnc.tmrActvFn == NULLP)  
+-       {
+-           SSLOGERROR(ERRCLS_INT_PAR, ESS532, ERRZERO, "Null pointer");
+-           RETVALUE(RFAILED);
+-       }
+-    } 
+  
+  #ifdef SS_MULTIPLE_PROCS
+     /* check if the procId has been registered with SSI */
+--- 457,468 ----
+        RETVALUE(RFAILED);
+     }
+  
+!    /* check timer function */
+!    if (tmrFnct == NULLP)
+!    {
+!       SSLOGERROR(ERRCLS_INT_PAR, ESS532, ERRZERO, "Null pointer");
+        RETVALUE(RFAILED);
+     }
+  
+  #ifdef SS_MULTIPLE_PROCS
+     /* check if the procId has been registered with SSI */
+***************
+*** 555,572 ****
+  #endif /* SS_MULTIPLE_PROCS */
+              && (osCp.tmrTbl[i].ownerInst == inst)
+              /* ss041.103 - Added mtFlag check */
+-             /* ss015.301 Enclosed all timer activation functions in a union. */
+  #ifndef SS_MULTIPLE_PROCS
+  #ifdef SS_MT_TMR
+!             && (osCp.tmrTbl[i].ssTmrActvFn.mtFlag == ssTmrActvFn.mtFlag)
+!             && ((ssTmrActvFn.mtFlag == FALSE
+!                   && osCp.tmrTbl[i].ssTmrActvFn.actvFnc.tmrActvFn == ssTmrActvFn.actvFnc.tmrActvFn)  
+!                || osCp.tmrTbl[i].ssTmrActvFn.actvFnc.tmrActvFnMt == ssTmrActvFn.actvFnc.tmrActvFnMt)
+  #else
+!             && (osCp.tmrTbl[i].ssTmrActvFn.actvFnc.tmrActvFn == ssTmrActvFn.actvFnc.tmrActvFn)
+  #endif
+  #else
+!             && (osCp.tmrTbl[i].ssTmrActvFn.actvFnc.tmrActvFn == ssTmrActvFn.actvFnc.tmrActvFn)
+  #endif
+              && (osCp.tmrTbl[i].interval == (U32) ((period * SS_TICKS_SEC) / units)))
+        {
+--- 557,573 ----
+  #endif /* SS_MULTIPLE_PROCS */
+              && (osCp.tmrTbl[i].ownerInst == inst)
+              /* ss041.103 - Added mtFlag check */
+  #ifndef SS_MULTIPLE_PROCS
+  #ifdef SS_MT_TMR
+!             && (osCp.tmrTbl[i].mtFlag == mtFlag)
+!             && ((mtFlag == FALSE
+!                   && osCp.tmrTbl[i].tmrActvFn == (PFS16)tmrFnct)
+!                || osCp.tmrTbl[i].tmrActvFnMt == (PAIFTMRS16)tmrFnct)
+  #else
+!             && (osCp.tmrTbl[i].tmrActvFn == tmrFnct)
+  #endif
+  #else
+!             && (osCp.tmrTbl[i].tmrActvFn == tmrFnct)
+  #endif
+              && (osCp.tmrTbl[i].interval == (U32) ((period * SS_TICKS_SEC) / units)))
+        {
+***************
+*** 597,618 ****
+     tmr->ownerEnt  = ent;
+     tmr->ownerInst = inst;
+     tmr->interval  = (U32) ((period * SS_TICKS_SEC) / units);
+-    tmr->ssTmrActvFn.mtFlag = ssTmrActvFn.mtFlag;
+  
+     /* ss041.103 */
+-    /* ss015.301 Enclosed all timer activation functions in a union. */
+  #ifndef SS_MULTIPLE_PROCS
+  #ifdef SS_MT_TMR
+!    if (ssTmrActvFn.mtFlag == TRUE)
+     {
+!       tmr->ssTmrActvFn.actvFnc.tmrActvFnMt = ssTmrActvFn.actvFnc.tmrActvFnMt;  
+     }
+     else
+  #endif
+- #endif
+     {
+!       tmr->ssTmrActvFn.actvFnc.tmrActvFn = ssTmrActvFn.actvFnc.tmrActvFn;
+     }
+  
+  
+     /* ask the implementation to start the timer */
+--- 598,620 ----
+     tmr->ownerEnt  = ent;
+     tmr->ownerInst = inst;
+     tmr->interval  = (U32) ((period * SS_TICKS_SEC) / units);
+  
+     /* ss041.103 */
+  #ifndef SS_MULTIPLE_PROCS
+  #ifdef SS_MT_TMR
+!    tmr->mtFlag = mtFlag;
+!    if (mtFlag == TRUE)
+     {
+!       tmr->tmrActvFnMt = (PAIFTMRS16)tmrFnct;
+     }
+     else
+  #endif
+     {
+!       tmr->tmrActvFn = (PFS16)tmrFnct;
+     }
++ #else
++    tmr->tmrActvFn = tmrFnct;
++ #endif
+  
+  
+     /* ask the implementation to start the timer */
+***************
+*** 626,637 ****
+        tmr->ownerEnt = ENTNC;
+        tmr->ownerInst = INSTNC;
+        tmr->interval = 0;
+!       /* ss015.301 Enclosed all timer activation functions in a union. */
+!       tmr->ssTmrActvFn.mtFlag = FALSE;
+!       tmr->ssTmrActvFn.actvFnc.tmrActvFn = NULLP;
+  #ifndef SS_MULTIPLE_PROCS
+  #ifdef SS_MT_TMR
+!       tmr->ssTmrActvFn.actvFnc.tmrActvFnMt = NULLP;
+  #endif
+  #endif
+     }
+--- 628,638 ----
+        tmr->ownerEnt = ENTNC;
+        tmr->ownerInst = INSTNC;
+        tmr->interval = 0;
+!       tmr->tmrActvFn = NULLP;
+  #ifndef SS_MULTIPLE_PROCS
+  #ifdef SS_MT_TMR
+!       tmr->mtFlag = FALSE;
+!       tmr->tmrActvFnMt = NULLP;
+  #endif
+  #endif
+     }
+***************
+*** 694,708 ****
+  #endif
+  {
+     S16 ret;
+!    /* ss015.301 Enclosed all timer activation functions in a union. */
+!    SsTmrActvFn ssTmrActvFn;
+     /* ss041.103 - Moved handling to STmrDeregHndlr */
+  
+     TRC1(SDeregCfgTmr);
+  
+!    ssTmrActvFn.mtFlag = FALSE;
+!    ssTmrActvFn.actvFnc.tmrActvFn = tmrFnct;  
+!    ret = STmrDeregHndlr(ent, inst, period, units, ssTmrActvFn);
+  
+     RETVALUE(ret);
+  }
+--- 695,710 ----
+  #endif
+  {
+     S16 ret;
+! 
+     /* ss041.103 - Moved handling to STmrDeregHndlr */
+  
+     TRC1(SDeregCfgTmr);
+  
+! #ifdef SS_MT_TMR
+!    ret = STmrDeregHndlr(ent, inst, period, units, FALSE, (Void *)tmrFnct);
+! #else
+!    ret = STmrDeregHndlr(ent, inst, period, units, tmrFnct);
+! #endif
+  
+     RETVALUE(ret);
+  }
+***************
+*** 730,745 ****
+  #endif
+  {
+     S16 ret;
+-    /* ss015.301 Enclosed all timer activation functions in a union. */ 
+-    SsTmrActvFn ssTmrActvFn;
+  
+     /* ss041.103 - Moved handling to STmrDeregHndlr */
+  
+     TRC1(SDeregCfgTmr);
+  
+!    ssTmrActvFn.mtFlag = FALSE;
+!    ssTmrActvFn.actvFnc.tmrActvFn = tmrFnct;  
+!    ret = STmrDeregHndlr(proc, ent, inst, period, units, ssTmrActvFn);
+  
+     RETVALUE(ret);
+  }
+--- 732,743 ----
+  #endif
+  {
+     S16 ret;
+  
+     /* ss041.103 - Moved handling to STmrDeregHndlr */
+  
+     TRC1(SDeregCfgTmr);
+  
+!    ret = STmrDeregHndlr(proc, ent, inst, period, units, tmrFnct);
+  
+     RETVALUE(ret);
+  }
+***************
+*** 783,797 ****
+  #endif
+  {
+     S16 ret;
+-    /* ss015.301 Enclosed all timer activation functions in a union. */
+-    SsTmrActvFn ssTmrActvFn;
+  
+     TRC1(SDeregCfgTmrMt);
+  
+!    ssTmrActvFn.actvFnc.tmrActvFnMt = tmrFnctMt;
+!    ssTmrActvFn.mtFlag = TRUE;
+! 
+!    ret = STmrDeregHndlr(ent, inst, period, units, ssTmrActvFn);
+  
+     RETVALUE(ret);
+  }
+--- 781,790 ----
+  #endif
+  {
+     S16 ret;
+  
+     TRC1(SDeregCfgTmrMt);
+  
+!    ret = STmrDeregHndlr(ent, inst, period, units, TRUE, (Void *)tmrFnctMt);
+  
+     RETVALUE(ret);
+  }
+***************
+*** 815,825 ****
+  *
+  */
+  /* ss029.103: addition: procId added and timer function type modified */ 
+  
+! /* ss015.301 Changed the timer activation function type as all timer activation
+!  * functions are enclosed in a union.
+!  */
+! #ifndef SS_MULTIPLE_PROCS
+  #ifdef ANSI
+  PRIVATE S16 STmrDeregHndlr
+  (
+--- 808,816 ----
+  *
+  */
+  /* ss029.103: addition: procId added and timer function type modified */ 
++ #ifndef SS_MULTIPLE_PROCS
+  
+! #ifndef SS_MT_TMR
+  #ifdef ANSI
+  PRIVATE S16 STmrDeregHndlr
+  (
+***************
+*** 827,833 ****
+  Inst inst,                  /* instance */
+  S16 period,                 /* period */
+  S16 units,                  /* period units */
+! SsTmrActvFn ssTmrActvFn           /* timer function */
+  )
+  #else
+  PRIVATE S16 STmrDeregHndlr(ent, inst, period, units, tmrFnct)
+--- 818,824 ----
+  Inst inst,                  /* instance */
+  S16 period,                 /* period */
+  S16 units,                  /* period units */
+! PFS16 tmrFnct               /* timer function */
+  )
+  #else
+  PRIVATE S16 STmrDeregHndlr(ent, inst, period, units, tmrFnct)
+***************
+*** 835,845 ****
+  Inst inst;                  /* instance */
+  S16 period;                 /* period */
+  S16 units;                  /* period units*/
+! SsTmrActvFn ssTmrActvFn;          /* timer function */
+  #endif
+! /* ss015.301: Removed the timer handler prototypes guarded under SS_MT_TMR
+!  * and handled mtFlag in existing timer handlers.
+!  */
+  
+  #else /* SS_MULTIPLE_PROCS */
+  
+--- 826,854 ----
+  Inst inst;                  /* instance */
+  S16 period;                 /* period */
+  S16 units;                  /* period units*/
+! PFS16 tmrFnct;              /* timer function */
+  #endif
+! #else /* else of not SS_MT_TMR */
+! #ifdef ANSI
+! PRIVATE S16 STmrDeregHndlr
+! (
+! Ent ent,                    /* entity */
+! Inst inst,                  /* instance */
+! S16 period,                 /* period */
+! S16 units,                  /* period units */
+! Bool mtFlag,                /* MT support */
+! Void *tmrFnct               /* timer function */
+! )
+! #else
+! PRIVATE S16 STmrDeregHndlr(ent, inst, period, units, mtFlag, tmrFnct)
+! Ent ent;                    /* entity */
+! Inst inst;                  /* instance */
+! S16 period;                 /* period */
+! S16 units;                  /* period units*/
+! Bool mtFlag;                /* MT support */
+! Void *tmrFnct;              /* timer function */
+! #endif
+! #endif /* SS_MT_TMR */
+  
+  #else /* SS_MULTIPLE_PROCS */
+  
+***************
+*** 851,866 ****
+  Inst inst,                  /* instance */
+  S16 period,                 /* period */
+  S16 units,                  /* period units */
+! SsTmrActvFn ssTmrActvFn          /* timer function */
+  )
+  #else
+! PRIVATE S16 STmrDeregHndlr(proc, ent, inst, period, units, ssTmrActvFn)
+  ProcId proc;                /* processor */
+  Ent ent;                    /* entity */
+  Inst inst;                  /* instance */
+  S16 period;                 /* period */
+  S16 units;                  /* period units*/
+! SsTmrActvFn ssTmrActvFn;         /* timer function */
+  #endif
+  
+  #endif /* SS_MULTIPLE_PROCS */
+--- 860,875 ----
+  Inst inst,                  /* instance */
+  S16 period,                 /* period */
+  S16 units,                  /* period units */
+! PAIFTMRS16 tmrFnct          /* timer function */
+  )
+  #else
+! PRIVATE S16 STmrDeregHndlr(proc, ent, inst, period, units, tmrFnct)
+  ProcId proc;                /* processor */
+  Ent ent;                    /* entity */
+  Inst inst;                  /* instance */
+  S16 period;                 /* period */
+  S16 units;                  /* period units*/
+! PAIFTMRS16 tmrFnct;         /* timer function */
+  #endif
+  
+  #endif /* SS_MULTIPLE_PROCS */
+***************
+*** 909,939 ****
+     }
+  
+     /* check timer function */
+!    if(ssTmrActvFn.mtFlag == TRUE)
+!    {
+! #ifndef SS_MULTIPLE_PROCS
+! #ifdef SS_MT_TMR
+!    if (ssTmrActvFn.actvFnc.tmrActvFnMt == NULLP)  
+!    {
+!       SSLOGERROR(ERRCLS_INT_PAR, ESS547, ERRZERO, "Null pointer");
+!       RETVALUE(RFAILED);
+!    }
+! #else
+!     RETVALUE(RFAILED);
+! #endif
+! #else
+!     RETVALUE(RFAILED);
+! #endif
+!  
+!    }
+!    else
+!    {
+!    if (ssTmrActvFn.actvFnc.tmrActvFn == NULLP)  
+     {
+        SSLOGERROR(ERRCLS_INT_PAR, ESS547, ERRZERO, "Null pointer");
+        RETVALUE(RFAILED);
+     }
+-   }
+  
+  #ifdef SS_MULTIPLE_PROCS
+     /* check if the procId has been registered with SSI */
+--- 918,928 ----
+     }
+  
+     /* check timer function */
+!    if (tmrFnct == NULLP)
+     {
+        SSLOGERROR(ERRCLS_INT_PAR, ESS547, ERRZERO, "Null pointer");
+        RETVALUE(RFAILED);
+     }
+  
+  #ifdef SS_MULTIPLE_PROCS
+     /* check if the procId has been registered with SSI */
+***************
+*** 1014,1032 ****
+              &&  osCp.tmrTbl[idx].ownerInst == inst
+  #ifndef SS_MULTIPLE_PROCS
+  #ifdef SS_MT_TMR
+!            /*
+! 	    *  ss015.301 - Modifed as timer activation functions
+! 	    *  enclosed in a union. 
+! 	    */
+!             &&  osCp.tmrTbl[idx].ssTmrActvFn.mtFlag == ssTmrActvFn.mtFlag
+!             && ((ssTmrActvFn.mtFlag == FALSE
+!                   &&  osCp.tmrTbl[idx].ssTmrActvFn.actvFnc.tmrActvFn == ssTmrActvFn.actvFnc.tmrActvFn)
+!                || osCp.tmrTbl[idx].ssTmrActvFn.actvFnc.tmrActvFnMt == ssTmrActvFn.actvFnc.tmrActvFnMt)
+  #else
+!             &&  osCp.tmrTbl[idx].ssTmrActvFn.actvFnc.tmrActvFn == ssTmrActvFn.actvFnc.tmrActvFn
+  #endif
+  #else
+!             &&  osCp.tmrTbl[idx].ssTmrActvFn.actvFnc.tmrActvFn == ssTmrActvFn.actvFnc.tmrActvFn
+  #endif
+              &&  osCp.tmrTbl[idx].interval == (U32) ((period * SS_TICKS_SEC) / units))
+        {
+--- 1003,1017 ----
+              &&  osCp.tmrTbl[idx].ownerInst == inst
+  #ifndef SS_MULTIPLE_PROCS
+  #ifdef SS_MT_TMR
+!             &&  osCp.tmrTbl[idx].mtFlag == mtFlag
+!             && ((mtFlag == FALSE
+!                   &&  osCp.tmrTbl[idx].tmrActvFn == (PFS16)tmrFnct)
+!                || osCp.tmrTbl[idx].tmrActvFnMt == (PAIFTMRS16)tmrFnct)
+  #else
+!             &&  osCp.tmrTbl[idx].tmrActvFn == tmrFnct
+  #endif
+  #else
+!             &&  osCp.tmrTbl[idx].tmrActvFn == tmrFnct
+  #endif
+              &&  osCp.tmrTbl[idx].interval == (U32) ((period * SS_TICKS_SEC) / units))
+        {
+***************
+*** 1066,1079 ****
+        tmr->ownerEnt = ENTNC;
+        tmr->ownerInst = INSTNC;
+        tmr->interval = 0;
+!       /*
+!        *  ss015.301: Modifed as timer activation functions enclosed in a union. 
+!        */
+!       tmr->ssTmrActvFn.mtFlag = FALSE;
+!       tmr->ssTmrActvFn.actvFnc.tmrActvFn = NULLP;
+  #ifndef SS_MULTIPLE_PROCS
+  #ifdef SS_MT_TMR
+!       tmr->ssTmrActvFn.actvFnc.tmrActvFnMt = NULLP;
+  #endif
+  #endif
+  
+--- 1051,1061 ----
+        tmr->ownerEnt = ENTNC;
+        tmr->ownerInst = INSTNC;
+        tmr->interval = 0;
+!       tmr->tmrActvFn = NULLP;
+  #ifndef SS_MULTIPLE_PROCS
+  #ifdef SS_MT_TMR
+!       tmr->mtFlag = FALSE;
+!       tmr->tmrActvFnMt = NULLP;
+  #endif
+  #endif
+  
+***************
+*** 1148,1157 ****
+                                 support
+  /main/1      ss002.301 rss  1. Added mtFlag variable in STmrDeregHndlr function
+                                 argument to cater Non Ansi compilation
+- 
+- /main/1       ss015.301 akapoor  1. Enclosed all timer activation functions in
+-                                     a union.
+-                                  2. Removed the timer handler prototypes guarded
+-                                     under SS_MT_TMR and handled mtFlag in existing
+-                                     timer handlers.
+  *********************************************************************91*/
+--- 1130,1133 ----
+                                 support
+  /main/1      ss002.301 rss  1. Added mtFlag variable in STmrDeregHndlr function
+                                 argument to cater Non Ansi compilation
+  *********************************************************************91*/
